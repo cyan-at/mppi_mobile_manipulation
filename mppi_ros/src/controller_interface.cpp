@@ -152,7 +152,7 @@ bool ControllerRos::update_policy() {
 
   if (controller_->config_.logging) {
     mppi_ros::to_msg(controller_->get_data(), data_ros_);
-    // data_publisher_.publish(data_ros_);
+    data_publisher_->publish(data_ros_);
   }
   return true;
 }
@@ -160,15 +160,17 @@ bool ControllerRos::update_policy() {
 void ControllerRos::publish_stage_cost() {
   stage_cost_.data =
       controller_->get_stage_cost();  // TODO(giuseppe) see how to do this
-  // cost_publisher_.publish(stage_cost_);
+  cost_publisher_->publish(stage_cost_);
 }
 
 void ControllerRos::publish_rollout_cost() {
   min_rollout_cost_.data = controller_->get_rollout_min_cost();
-  // min_rollout_cost_publisher_.publish(min_rollout_cost_);
+  min_rollout_cost_publisher_->publish(
+    min_rollout_cost_);
 
   max_rollout_cost_.data = controller_->get_rollout_max_cost();
-  // max_rollout_cost_publisher_.publish(max_rollout_cost_);
+  max_rollout_cost_publisher_->publish(
+    max_rollout_cost_);
 }
 
 void ControllerRos::publish_input() {
@@ -182,7 +184,7 @@ void ControllerRos::publish_input() {
   for (size_t i = 0; i < input_copy_.size(); i++) {
     input_ros_.data[i] = input_copy_(i);
   }
-  // input_publisher_.publish(input_ros_);
+  input_publisher_->publish(input_ros_);
 }
 
 void ControllerRos::set_observation(const mppi::observation_t &x,

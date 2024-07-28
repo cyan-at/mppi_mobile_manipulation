@@ -48,6 +48,7 @@ class ControllerRos {
   std_msgs::msg::Float32 stage_cost_;
   std_msgs::msg::Float32 min_rollout_cost_;
   std_msgs::msg::Float32 max_rollout_cost_;
+  // mppi::CostBase::cost_ptr cost_;
 
   mppi_ros_interfaces::msg::Data data_ros_;
   rclcpp::Publisher<mppi_ros_interfaces::msg::Data>::SharedPtr data_publisher_;
