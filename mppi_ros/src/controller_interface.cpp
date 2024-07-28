@@ -18,34 +18,35 @@ ControllerRos::~ControllerRos() {
   // this->stop();
 }
 
-/*
+bool ControllerRos::update_reference() { return true; }
 bool ControllerRos::init_default_params() {
   bool ok = true;
 
   ok &=
-      mppi_ros::getNonNegative(nh_, "policy_update_rate", policy_update_rate_);
-  ok &= mppi_ros::getNonNegative(nh_, "reference_update_rate",
+      mppi_ros::getNonNegative(nh, "policy_update_rate", policy_update_rate_);
+  ok &= mppi_ros::getNonNegative(nh, "reference_update_rate",
                                  reference_update_rate_);
-  ok &= mppi_ros::getNonNegative(nh_, "ros_publish_rate", ros_publish_rate_);
-  ok &= mppi_ros::getBool(nh_, "publish_ros", publish_ros_);
+  ok &= mppi_ros::getNonNegative(nh, "ros_publish_rate", ros_publish_rate_);
+  ok &= mppi_ros::getBool(nh, "publish_ros", publish_ros_);
 
   if (!ok) {
-    ROS_ERROR("Failed to parse default parameters.");
+    // ROS_ERROR("Failed to parse default parameters.");
     return false;
   }
   return true;
 }
 
 void ControllerRos::init_default_ros() {
-  cost_publisher_ = nh_.advertise<std_msgs::Float64>("/cost", 10);
-  input_publisher_ = nh_.advertise<std_msgs::Float32MultiArray>("/input", 10);
-  min_rollout_cost_publisher_ =
-      nh_.advertise<std_msgs::Float64>("/min_rollout_cost", 10);
-  max_rollout_cost_publisher_ =
-      nh_.advertise<std_msgs::Float64>("/max_rollout_cost", 10);
-  data_publisher_ = nh_.advertise<mppi_ros::Data>("/mppi_data", 10);
+  // cost_publisher_ = nh_.advertise<std_msgs::Float64>("/cost", 10);
+  // input_publisher_ = nh_.advertise<std_msgs::Float32MultiArray>("/input", 10);
+  // min_rollout_cost_publisher_ =
+  //     nh_.advertise<std_msgs::Float64>("/min_rollout_cost", 10);
+  // max_rollout_cost_publisher_ =
+  //     nh_.advertise<std_msgs::Float64>("/max_rollout_cost", 10);
+  // data_publisher_ = nh_.advertise<mppi_ros::Data>("/mppi_data", 10);
 }
 
+/*
 bool ControllerRos::init() {
   if (!init_default_params()) return false;
   init_default_ros();
@@ -132,8 +133,6 @@ bool ControllerRos::update_policy_thread(
   }
   return true;
 }
-
-bool ControllerRos::update_reference() { return true; }
 
 bool ControllerRos::update_reference_thread(
     const mppi::threading::WorkerEvent &event) {
