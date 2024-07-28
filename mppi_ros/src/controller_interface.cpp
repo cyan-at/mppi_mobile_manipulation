@@ -12,10 +12,13 @@
 
 using namespace mppi_ros;
 
-ControllerRos::ControllerRos(ros::NodeHandle &nh) : nh_(nh) {}
+ControllerRos::ControllerRos(rclcpp::Node::SharedPtr& nh) : nh(nh) {}
 
-ControllerRos::~ControllerRos() { this->stop(); }
+ControllerRos::~ControllerRos() {
+  // this->stop();
+}
 
+/*
 bool ControllerRos::init_default_params() {
   bool ok = true;
 
@@ -205,3 +208,4 @@ void ControllerRos::get_input_state(const observation_t &x,
 }
 
 void ControllerRos::stop() { worker_manager_.stopWorkers(); }
+*/
