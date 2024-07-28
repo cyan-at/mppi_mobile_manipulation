@@ -34,7 +34,7 @@ class DynamicsBase {
   virtual const observation_t get_state() const = 0;
 
   // TODO(giuseppe): param x is never used!
-  virtual input_t get_zero_input(const observation_t& x) {
+  virtual input_t get_zero_input(const observation_t&) {
     return input_t::Zero(this->get_input_dimension());
   }
 };

@@ -37,16 +37,16 @@ bool ControllerRos::init_default_params() {
 }
 
 void ControllerRos::init_default_ros() {
-  // cost_publisher_ = nh_.advertise<std_msgs::Float64>("/cost", 10);
-  // input_publisher_ = nh_.advertise<std_msgs::Float32MultiArray>("/input", 10);
-  // min_rollout_cost_publisher_ =
-  //     nh_.advertise<std_msgs::Float64>("/min_rollout_cost", 10);
-  // max_rollout_cost_publisher_ =
-  //     nh_.advertise<std_msgs::Float64>("/max_rollout_cost", 10);
-  // data_publisher_ = nh_.advertise<mppi_ros::Data>("/mppi_data", 10);
+  cost_publisher_ = nh->create_publisher<std_msgs::msg::Float32>("/cost", 10);
+
+  input_publisher_ = nh->create_publisher<std_msgs::msg::Float32MultiArray>("/input", 10);
+
+  min_rollout_cost_publisher_ = nh->create_publisher<std_msgs::msg::Float32>("/min_rollout_cost", 10);
+  max_rollout_cost_publisher_ = nh->create_publisher<std_msgs::msg::Float32>("/max_rollout_cost", 10);
+
+  data_publisher_ = nh->create_publisher<mppi_ros_interfaces::msg::Data>("/mppi_data", 10);
 }
 
-/*
 bool ControllerRos::init() {
   if (!init_default_params()) return false;
   init_default_ros();
@@ -56,30 +56,30 @@ bool ControllerRos::init() {
   try {
     ok = set_controller(controller_);
   } catch (std::runtime_error &err) {
-    ROS_ERROR_STREAM(err.what());
+    // ROS_ERROR_STREAM(err.what());
     ok = false;
   } catch (...) {
-    ROS_ERROR("Unknown exception caught while setting the controller.");
+    // ROS_ERROR("Unknown exception caught while setting the controller.");
     ok = false;
   }
   if (controller_ == nullptr || !ok) return false;
 
   initialized_ = true;
   started_ = false;
-  ROS_INFO("Controller interface initialized.");
+  // ROS_INFO("Controller interface initialized.");
   return true;
 }
 
 bool ControllerRos::start() {
   if (!initialized_) {
-    ROS_ERROR_STREAM(
-        "The controller is not initialized. Have you called the init() "
-        "method?");
+    // ROS_ERROR_STREAM(
+    //     "The controller is not initialized. Have you called the init() "
+    //     "method?");
     return false;
   }
 
   if (started_) {
-    ROS_WARN_STREAM("The controller has already been started.");
+    // ROS_WARN_STREAM("The controller has already been started.");
     return true;
   }
 
@@ -87,8 +87,9 @@ bool ControllerRos::start() {
   update_policy_opt.name_ = "update_policy_thread";
   update_policy_opt.timeStep_ =
       (policy_update_rate_ == 0) ? 0 : 1.0 / policy_update_rate_;
-  update_policy_opt.callback_ = std::bind(&ControllerRos::update_policy_thread,
-                                          this, std::placeholders::_1);
+  update_policy_opt.callback_ = std::bind(
+    &ControllerRos::update_policy_thread,
+    this, std::placeholders::_1);
   worker_manager_.addWorker(update_policy_opt, true);
 
   mppi::threading::WorkerOptions update_reference_opt;
@@ -103,7 +104,8 @@ bool ControllerRos::start() {
     publish_ros_opt.name_ = "publish_ros_thread";
     publish_ros_opt.timeStep_ = 1.0 / ros_publish_rate_;
     publish_ros_opt.callback_ = std::bind(&ControllerRos::publish_ros_thread,
-                                          this, std::placeholders::_1);
+      this,
+      std::placeholders::_1);
     worker_manager_.addWorker(publish_ros_opt, true);
   }
 
@@ -111,16 +113,7 @@ bool ControllerRos::start() {
   return true;
 }
 
-bool ControllerRos::update_policy() {
-  if (!observation_set_) return true;
-  controller_->update_policy();
-
-  if (controller_->config_.logging) {
-    mppi_ros::to_msg(controller_->get_data(), data_ros_);
-    data_publisher_.publish(data_ros_);
-  }
-  return true;
-}
+void ControllerRos::stop() { worker_manager_.stopWorkers(); }
 
 bool ControllerRos::update_policy_thread(
     const mppi::threading::WorkerEvent &event) {
@@ -129,7 +122,7 @@ bool ControllerRos::update_policy_thread(
 
   if (controller_->config_.logging) {
     mppi_ros::to_msg(controller_->get_data(), data_ros_);
-    data_publisher_.publish(data_ros_);
+    // data_publisher_.publish(data_ros_);
   }
   return true;
 }
@@ -153,18 +146,29 @@ bool ControllerRos::publish_ros_thread(
   return true;
 }
 
+bool ControllerRos::update_policy() {
+  if (!observation_set_) return true;
+  controller_->update_policy();
+
+  if (controller_->config_.logging) {
+    mppi_ros::to_msg(controller_->get_data(), data_ros_);
+    // data_publisher_.publish(data_ros_);
+  }
+  return true;
+}
+
 void ControllerRos::publish_stage_cost() {
   stage_cost_.data =
       controller_->get_stage_cost();  // TODO(giuseppe) see how to do this
-  cost_publisher_.publish(stage_cost_);
+  // cost_publisher_.publish(stage_cost_);
 }
 
 void ControllerRos::publish_rollout_cost() {
   min_rollout_cost_.data = controller_->get_rollout_min_cost();
-  min_rollout_cost_publisher_.publish(min_rollout_cost_);
+  // min_rollout_cost_publisher_.publish(min_rollout_cost_);
 
   max_rollout_cost_.data = controller_->get_rollout_max_cost();
-  max_rollout_cost_publisher_.publish(max_rollout_cost_);
+  // max_rollout_cost_publisher_.publish(max_rollout_cost_);
 }
 
 void ControllerRos::publish_input() {
@@ -178,7 +182,7 @@ void ControllerRos::publish_input() {
   for (size_t i = 0; i < input_copy_.size(); i++) {
     input_ros_.data[i] = input_copy_(i);
   }
-  input_publisher_.publish(input_ros_);
+  // input_publisher_.publish(input_ros_);
 }
 
 void ControllerRos::set_observation(const mppi::observation_t &x,
@@ -206,5 +210,3 @@ void ControllerRos::get_input_state(const observation_t &x,
   }
 }
 
-void ControllerRos::stop() { worker_manager_.stopWorkers(); }
-*/
